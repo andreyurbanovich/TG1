@@ -59,15 +59,15 @@ for sheetname in xl.sheet_names:
         rown = str(row[0])
         #print(cursheet.loc[rown,:])
         #print(cursheet.ix[rown,2])
-        valinst = cursheet.ix[rown,1] + cursheet.ix[rown,3] + \
-            cursheet.ix[rown,5]
+        valinst = int(cursheet.ix[rown,1]) + int(cursheet.ix[rown,3]) + \
+            int(cursheet.ix[rown,5])
         
-        valrev = cursheet.ix[rown,0] + cursheet.ix[rown,2] + \
-            cursheet.ix[rown,4]
+        valrev = int(cursheet.ix[rown,0]) + int(cursheet.ix[rown,2]) + \
+            int(cursheet.ix[rown,4])
         rev_game_country.set_value(sheetname,rown,valrev)  
         inst_game_country.set_value(sheetname,rown,valinst)
 
-rev_game_country.to_csv(rev_game_country)
-inst_game_country(inst_game_country)
-rev_game_platform(rev_game_platform)
-inst_game_platform(inst_game_platform)
+rev_game_country.to_csv('rev_game_country.csv')
+inst_game_country.to_csv('inst_game_country.csv')
+rev_game_platform.to_csv('rev_game_platform.csv')
+inst_game_platform.to_csv('inst_game_platform.csv')

@@ -5,7 +5,7 @@
 import pandas as pd
 import numpy as np
 
-xl = pd.ExcelFile('file://localhost/reliance games/reliance_from_thinkgaming.xls')
+xl = pd.ExcelFile('file://localhost/1/reliance_from_thinkgaming.xls')
 
 countries = []
 games = []
@@ -45,21 +45,25 @@ for sheetname in xl.sheet_names:
     cursheet = cursheet.applymap(lambda x: str(x).replace('-','0'))                         
     cursheet.applymap(int)
     
-    for col in cursheet.iteritems:
-        coln = cursheet.column[row]
-        val = cursheet.sum[coln]
-            if 'INSTALLS' in coln:
-                inst_game_platform.set_value(sheetname,coln,val)
+    for col in cursheet.iteritems():
+        coln = str(col[0])
+        val = cursheet[coln].sum()
+        if 'INSTALLS' in coln:
+            inst_game_platform.set_value(sheetname,coln,val)
                 #insert to installs df
-            else: 
-                rev_game_platform.set_value(sheetname,coln,val)
+        else: 
+            rev_game_platform.set_value(sheetname,coln,val)
     
-    for row in cursheet.iterrows:
-        rown = cursheet.index[row]
-        valinst = cursheet.iloc[rown,2] + cursheet.iloc[rown,4] + 
-        cursheet.iloc[rown,6]
-        valrev = cursheet.iloc[rown,1] + cursheet.iloc[rown,3] + 
-        cursheet.iloc[rown,5]
+    for row in cursheet.iterrows():
+        
+        rown = str(row[0])
+        #print(cursheet.loc[rown,:])
+        #print(cursheet.ix[rown,2])
+        valinst = cursheet.ix[rown,1] + cursheet.ix[rown,3] + \
+            cursheet.ix[rown,5]
+        
+        valrev = cursheet.ix[rown,0] + cursheet.ix[rown,2] + \
+            cursheet.ix[rown,4]
         rev_game_country.set_value(sheetname,rown,valrev)  
         inst_game_country.set_value(sheetname,rown,valinst)
 
@@ -67,4 +71,3 @@ rev_game_country.to_csv(rev_game_country)
 inst_game_country(inst_game_country)
 rev_game_platform(rev_game_platform)
 inst_game_platform(inst_game_platform)
-                

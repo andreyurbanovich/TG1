@@ -1,0 +1,77 @@
+# -*- coding: utf-8 -*-
+
+
+
+import pandas as pd
+import numpy as np
+
+xl = pd.ExcelFile('file://localhost/1/strategies/thinkgaming_strategies.xls')
+
+countries = []
+games = []
+platforms_rev = ['IPHONE REVENUE','IPAD REVENUE','GOOGLE PLAY REVENUE']
+platforms_ins = ['IPHONE INSTALLS','IPAD INSTALLS','GOOGLE PLAY INSTALLS']
+
+#loop for getting countries and variables
+for sheetname in xl.sheet_names:
+    cursheet = pd.read_excel(xl,sheetname,header = 0,index_col = 0)
+    games.append(sheetname)
+    countries= countries + list(cursheet.index.values)
+    variables = cursheet.columns.values
+    
+#get unique countries list
+fcountries = []   
+for x in countries:
+    fcountries.append(x)
+countries = set(fcountries)    
+print(countries)
+print(variables)    
+
+#create summary frames
+rev_game_country = pd.DataFrame(index=countries, columns=games)
+inst_game_country = pd.DataFrame(index=countries, columns=games)
+rev_game_platform = pd.DataFrame(index=platforms_rev, columns=games)
+inst_game_platform = pd.DataFrame(index=platforms_ins, columns=games)    
+
+for sheetname in xl.sheet_names:
+    cursheet = pd.read_excel(xl,sheetname,header = 0,index_col = 0)
+    games.append(sheetname)
+    
+    #clean and return to int or float
+    cursheet.applymap(str)
+    cursheet = cursheet.applymap(lambda x: str(x).replace('$',''))
+    cursheet = cursheet.applymap(lambda x: str(x).replace('/%',''))  
+    cursheet = cursheet.applymap(lambda x: str(x).replace(',',''))
+    cursheet = cursheet.applymap(lambda x: str(x).replace('-','0'))                         
+    cursheet.applymap(int)
+    
+    for col in cursheet.iteritems():
+        coln = str(col[0])
+        
+        val = cursheet.loc['All Countries',coln]
+        if 'INSTALLS' in coln:
+            inst_game_platform.set_value(coln,sheetname,val)
+            print(val)
+                #insert to installs df
+        else: 
+            rev_game_platform.set_value(coln,sheetname,val)
+    
+    #iterates over rows and calculates country sums
+    for row in cursheet.iterrows():
+        
+        rown = str(row[0])
+        #row[1:]=np.nan_to_num(row[1:])
+        #print(cursheet.loc[rown,:])
+        #print(cursheet.ix[rown,2])
+        valinst = int(cursheet.ix[rown,1]) + int(cursheet.ix[rown,3]) + \
+            int(cursheet.ix[rown,5])
+        
+        valrev = int(cursheet.ix[rown,0]) + int(cursheet.ix[rown,2]) + \
+            int(cursheet.ix[rown,4])
+        rev_game_country.set_value(rown,sheetname,valrev)  
+        inst_game_country.set_value(rown,sheetname,valinst)
+
+rev_game_country.to_csv('rev_game_country.csv')
+inst_game_country.to_csv('inst_game_country.csv')
+rev_game_platform.to_csv('rev_game_platform.csv')
+inst_game_platform.to_csv('inst_game_platform.csv')

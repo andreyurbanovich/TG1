@@ -1,0 +1,65 @@
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+
+import csv
+
+#results list with headers. Aggregated data to be inserted here
+revenue_list = [['game','platform','total revenue','total installs',
+    'IAP revenue', 'ad revenue', 'average ARPDAU']]
+
+filenum = 1
+#enter the number of files in the directory or add try/except
+#it will get the files starting with *(1).csv
+#here starts the files loop
+for i in range(134):
+    filename = '/1/strategies/game_detail (' + str(filenum) +')' +'.csv'
+    print(filename)
+    
+    f = open(filename,'r') 
+    file = list(csv.reader(f))
+    
+     #declare/reset variables
+    rowcounter = 0
+    revenue_list_row = []
+    total_revenue = 0
+    iap_revenue = 0
+    ad_revenue = 0
+    av_ARPDAU = 0
+    med_ARPDAU = 0
+    sum_DAU = 0
+    sum_installs = 0
+    day_count = 0
+    game = ''
+    
+    #in-file loop
+    for row in file:
+        if rowcounter == 0:
+            platform = row[1]
+            rowcounter += 1
+        elif rowcounter == 1:
+            rowcounter += 1
+        else:
+            game = row[4]
+            iap_revenue += int(row[6])
+            ad_revenue += int(row[7])
+            sum_DAU += int(row[10])
+            sum_installs += int(row[9])
+            rowcounter += 1
+    #aggregating        
+    total_revenue = iap_revenue + ad_revenue
+    av_ARPDAU = total_revenue /sum_DAU
+    revenue_list_row = [game,platform,total_revenue,sum_installs,iap_revenue,
+                        ad_revenue,round(av_ARPDAU,2)]
+    revenue_list.append(revenue_list_row)
+    filenum +=1  #next file    
+    f.close()
+
+#save all the results to csv file
+with open("/Users/admin/Documents/TG_revenue.csv", "w") as o:
+    writer = csv.writer(o)
+    writer.writerows(revenue_list)
+#IT ACTUALLY WORKS!!!

@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+
+
+import csv
+import pandas as pd
+
+#results list with headers. Aggregated data to be inserted here
+revenue_list = [['game','platform','total revenue','total installs',
+    'IAP revenue', 'ad revenue', 'average ARPDAU']]
+
+filenum = 1
+retention = pd.DataFrame()
+#enter the number of files in the directory or add try/except
+#it will get the files starting with *(1).csv
+#here starts the files loop
+
+for i in range(53):
+    filename = '/1/strategies/retention (' + str(filenum) +')' +'.csv'
+        
+    game = str(pd.read_csv(filename).iloc[1].index.values)
+    curfile = pd.read_csv(filename, skiprows = 2)
+    curret = pd.Series(game,index = ['Title'])
+    curret1 = pd.Series(data=curfile['% Retained'])
+    curret = curret.append(curret1)
+    retention[game] = curret
+    filenum +=1
+   
+
+#save all the results to csv file
+retention.to_csv('retention_summary.csv')

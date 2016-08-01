@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
+Spyder Editor
 
 This is a temporary script file.
 """
 #this part is for Google Sheets Export
-import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-
-
+import pandas as pd
 import csv
 from datetime import datetime, date, time
 import time
@@ -106,12 +105,18 @@ for i in range(137):
 with open("/Users/admin/Documents/TG_revenue.csv", "w",encoding='utf-8') as o:
     writer = csv.writer(o)
     writer.writerows(revenue_list)
+
     
-    
-#now this part is for Google Sheets Export
-"""
-    
-# Source dataframe
+
+scope = ['https://spreadsheets.google.com/feeds']
+credentials = ServiceAccountCredentials.from_json_keyfile_name \
+('/Users/admin/Documents/Dataexport-fb606d770c8d.json', scope)
+
+gc = gspread.authorize(credentials)
+ws = gc.open('export').sheet1
+print(ws)
+
+  # Source dataframe
 df = pd.DataFrame(revenue_list)
 df = df.fillna('')
 
@@ -128,16 +133,6 @@ def numberToLetters(q):
         q = q//26 - 1
     return result
 
-# Test
-#print numberToLetters(27) # Result : AA
-
-# Connection to the spreadsheet with the gspread library
-scope = ['https://spreadsheets.google.com/feeds']
-credentials = ServiceAccountCredentials.from_json_keyfile_name('/Users/admin/Documents/Dataexport-b697ea4a129f.json', scope)
-
-gc = gspread.authorize(credentials)
-ws = gc.open('export').Sheet1
-
 # Select the range that will be updated ('A1:C3' for example)
 #print 'A1:'+numberToLetters(num_columns)+str(num_lines)
 cell_list = ws.range('A1:'+numberToLetters(num_columns)+str(num_lines))
@@ -145,10 +140,7 @@ cell_list = ws.range('A1:'+numberToLetters(num_columns)+str(num_lines))
 # Modify the values
 for cell in cell_list:
     val = df.iloc[cell.row-1,cell.col-1]
-    cell.value = (val.decode('utf-8') if type(val) is str else val)
+    cell.value = val
 
 # Update in batch
-ws.update_cells(cell_list)
-"""
-    
-    
+ws.update_cells(cell_list)  

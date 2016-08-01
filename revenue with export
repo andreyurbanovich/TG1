@@ -1,0 +1,154 @@
+# -*- coding: utf-8 -*-
+"""
+
+This is a temporary script file.
+"""
+#this part is for Google Sheets Export
+import pandas as pd
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+
+import csv
+from datetime import datetime, date, time
+import time
+#results list with headers. Aggregated data to be inserted here
+revenue_list = [['game','platform','total revenue2','total installs2',
+    'IAP revenue2', 'ad revenue2', 'average ARPDAU2','total revenue1','total installs1',
+    'IAP revenue1', 'ad revenue1', 'average ARPDAU1','total revenue','total installs',
+    'IAP revenue', 'ad revenue', 'average ARPDAU']]
+
+filenum = 1
+#enter the number of files in the directory or add try/except
+#it will get the files starting with *(1).csv
+#here starts the files loop
+for i in range(137):
+    filename = '/1/Match_3/game_detail (' + str(filenum) +')' +'.csv'
+    print(filename)
+    
+    f = open(filename,'r',encoding='utf-8') 
+    file = list(csv.reader(f))
+    
+     #declare/reset variables
+    rowcounter = 0
+    revenue_list_row = []
+    total_revenue = 0
+    iap_revenue = 0
+    ad_revenue = 0
+    av_ARPDAU = 0
+    med_ARPDAU = 0
+    sum_DAU = 0
+    sum_installs = 0
+    day_count = 0
+    game = ''
+    #these are for 6 months
+    iap_revenue1 = 0
+    ad_revenue1 =0
+    sum_DAU1 =0
+    sum_installs1 = 0
+    iap_revenue2 = 0
+    ad_revenue2 =0
+    sum_DAU2 =0
+    sum_installs2 = 0
+        
+    #in-file loop
+    for row in file:
+        if rowcounter == 0:
+            platform = row[1]
+            rowcounter += 1
+        elif rowcounter == 1:
+            rowcounter += 1
+        else:
+            if datetime.strptime(row[0],'%Y-%m-%d') > datetime(2015,12,31):
+                game = row[4]
+                iap_revenue2 += int(row[6])
+                ad_revenue2 += int(row[7])
+                sum_DAU2 += int(row[10])
+                sum_installs2 += int(row[9])
+                rowcounter += 1
+            elif datetime.strptime(row[0],'%Y-%m-%d') > datetime(2015,6,30):
+                game = row[4]
+                iap_revenue1 += int(row[6])
+                ad_revenue1 += int(row[7])
+                sum_DAU1 += int(row[10])
+                sum_installs1 += int(row[9])
+                rowcounter += 1
+            else:
+                game = row[4]
+                iap_revenue += int(row[6])
+                ad_revenue += int(row[7])
+                sum_DAU += int(row[10])
+                sum_installs += int(row[9])
+                rowcounter += 1
+    #aggregating        
+    total_revenue = iap_revenue + ad_revenue
+    total_revenue1 = iap_revenue1 + ad_revenue1
+    total_revenue2 = iap_revenue2 + ad_revenue2
+    if sum_DAU == 0:
+        av_ARPDAU =0
+    else:
+        av_ARPDAU = total_revenue /sum_DAU
+    if sum_DAU1 == 0:
+        av_ARPDAU1 =0
+    else:
+        av_ARPDAU1 = total_revenue1 /sum_DAU1    
+    
+    av_ARPDAU2 = total_revenue2 /sum_DAU2
+    revenue_list_row = [game,platform,total_revenue2,sum_installs2,iap_revenue2,
+                        ad_revenue2,round(av_ARPDAU2,2),total_revenue1,sum_installs1,iap_revenue1,
+                        ad_revenue1,round(av_ARPDAU1,2),total_revenue,sum_installs,iap_revenue,
+                        ad_revenue,round(av_ARPDAU,2)]
+    revenue_list.append(revenue_list_row)
+    filenum +=1  #next file    
+    f.close()
+    
+#save all the results to csv file
+with open("/Users/admin/Documents/TG_revenue.csv", "w",encoding='utf-8') as o:
+    writer = csv.writer(o)
+    writer.writerows(revenue_list)
+    
+    
+#now this part is for Google Sheets Export
+"""
+    
+# Source dataframe
+df = pd.DataFrame(revenue_list)
+df = df.fillna('')
+
+# Get number of lines and columns
+num_lines, num_columns = df.shape
+
+# Function to convert numbers to letters (1->A, 2->B, ... 26->Z, 27->AA, 28->AB...)
+def numberToLetters(q):
+    q = q - 1
+    result = ''
+    while q >= 0:
+        remain = q % 26
+        result = chr(remain+65) + result;
+        q = q//26 - 1
+    return result
+
+# Test
+#print numberToLetters(27) # Result : AA
+
+# Connection to the spreadsheet with the gspread library
+scope = ['https://spreadsheets.google.com/feeds']
+credentials = ServiceAccountCredentials.from_json_keyfile_name('/Users/admin/Documents/Dataexport-b697ea4a129f.json', scope)
+
+gc = gspread.authorize(credentials)
+ws = gc.open('export').Sheet1
+
+# Select the range that will be updated ('A1:C3' for example)
+#print 'A1:'+numberToLetters(num_columns)+str(num_lines)
+cell_list = ws.range('A1:'+numberToLetters(num_columns)+str(num_lines))
+
+# Modify the values
+for cell in cell_list:
+    val = df.iloc[cell.row-1,cell.col-1]
+    cell.value = (val.decode('utf-8') if type(val) is str else val)
+
+# Update in batch
+ws.update_cells(cell_list)
+"""
+    
+    

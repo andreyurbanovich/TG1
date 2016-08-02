@@ -13,9 +13,9 @@ from datetime import datetime, date, time
 import time
 #results list with headers. Aggregated data to be inserted here
 revenue_list = [['game','platform','total revenue2','total installs2',
-    'IAP revenue2', 'ad revenue2', 'average ARPDAU2','total revenue1','total installs1',
-    'IAP revenue1', 'ad revenue1', 'average ARPDAU1','total revenue','total installs',
-    'IAP revenue', 'ad revenue', 'average ARPDAU']]
+    'IAP revenue2', 'ad revenue2', 'average ARPDAU2','average DAU2','total revenue1','total installs1',
+    'IAP revenue1', 'ad revenue1', 'average ARPDAU1','average DAU1','total revenue','total installs',
+    'IAP revenue', 'ad revenue', 'average ARPDAU','average DAU',]]
 
 filenum = 1
 #enter the number of files in the directory or add try/except
@@ -49,6 +49,9 @@ for i in range(137):
     ad_revenue2 =0
     sum_DAU2 =0
     sum_installs2 = 0
+    daycounter2 = 0
+    daycounter1 = 0
+    daycounter = 0
         
     #in-file loop
     for row in file:
@@ -65,6 +68,7 @@ for i in range(137):
                 sum_DAU2 += int(row[10])
                 sum_installs2 += int(row[9])
                 rowcounter += 1
+                daycounter2 += 1
             elif datetime.strptime(row[0],'%Y-%m-%d') > datetime(2015,6,30):
                 game = row[4]
                 iap_revenue1 += int(row[6])
@@ -72,6 +76,7 @@ for i in range(137):
                 sum_DAU1 += int(row[10])
                 sum_installs1 += int(row[9])
                 rowcounter += 1
+                daycounter1 += 1
             else:
                 game = row[4]
                 iap_revenue += int(row[6])
@@ -79,6 +84,7 @@ for i in range(137):
                 sum_DAU += int(row[10])
                 sum_installs += int(row[9])
                 rowcounter += 1
+                daycounter += 1
     #aggregating        
     total_revenue = iap_revenue + ad_revenue
     total_revenue1 = iap_revenue1 + ad_revenue1
@@ -93,10 +99,19 @@ for i in range(137):
         av_ARPDAU1 = total_revenue1 /sum_DAU1    
     
     av_ARPDAU2 = total_revenue2 /sum_DAU2
+    if daycounter >0:
+        av_DAU = sum_DAU/daycounter
+    else:
+        av_DAU2 =0
+    if daycounter1 >0:    
+        av_DAU1 = sum_DAU1/daycounter1
+    else:
+        av_DAU1 =0
+    av_DAU2 = sum_DAU2/daycounter2
     revenue_list_row = [game,platform,total_revenue2,sum_installs2,iap_revenue2,
-                        ad_revenue2,round(av_ARPDAU2,2),total_revenue1,sum_installs1,iap_revenue1,
-                        ad_revenue1,round(av_ARPDAU1,2),total_revenue,sum_installs,iap_revenue,
-                        ad_revenue,round(av_ARPDAU,2)]
+                        ad_revenue2,round(av_ARPDAU2,2),av_DAU2,total_revenue1,sum_installs1,iap_revenue1,
+                        ad_revenue1,round(av_ARPDAU1,2),av_DAU1,total_revenue,sum_installs,iap_revenue,
+                        ad_revenue,round(av_ARPDAU,2),av_DAU]
     revenue_list.append(revenue_list_row)
     filenum +=1  #next file    
     f.close()
@@ -107,7 +122,7 @@ with open("/Users/admin/Documents/TG_revenue.csv", "w",encoding='utf-8') as o:
     writer.writerows(revenue_list)
 
     
-
+#this part exports the results to Google Spreadsheets
 scope = ['https://spreadsheets.google.com/feeds']
 credentials = ServiceAccountCredentials.from_json_keyfile_name \
 ('/Users/admin/Documents/Dataexport-fb606d770c8d.json', scope)

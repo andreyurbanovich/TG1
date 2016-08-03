@@ -102,7 +102,7 @@ for i in range(137):
     if daycounter >0:
         av_DAU = sum_DAU/daycounter
     else:
-        av_DAU2 =0
+        av_DAU =0
     if daycounter1 >0:    
         av_DAU1 = sum_DAU1/daycounter1
     else:

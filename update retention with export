@@ -1,0 +1,68 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug  3 15:14:24 2016
+
+@author: cooljazz
+"""
+
+# -*- coding: utf-8 -*-
+
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import csv
+import pandas as pd
+
+filenum = 1
+retention = pd.DataFrame()
+#enter the number of files in the directory or add try/except
+#it will get the files starting with *(1).csv
+#here starts the files loop
+
+for i in range(49):
+    filename = '/1/RPG/retention (' + str(filenum) +')' +'.csv'
+        
+    game = str(pd.read_csv(filename).iloc[1].index.values)
+    curfile = pd.read_csv(filename, skiprows = 2)
+    curret = pd.Series(game,index = ['Title'])
+    curret1 = pd.Series(data=curfile['% Retained'])
+    curret = curret.append(curret1)
+    retention[game] = curret
+    filenum +=1
+   
+#this part exports the results to Google Spreadsheets
+scope = ['https://spreadsheets.google.com/feeds']
+credentials = ServiceAccountCredentials.from_json_keyfile_name \
+('/Users/cooljazz/Documents/Dataexport-fb606d770c8d.json', scope)
+
+gc = gspread.authorize(credentials)
+ws = gc.open('export').worksheet('Sheet2')
+  # Source dataframe
+df = retention
+df = df.fillna('')
+#df = df.fillna('')
+
+# Get number of lines and columns
+num_lines, num_columns = df.shape
+print (num_lines, num_columns)
+
+# Function to convert numbers to letters (1->A, 2->B, ... 26->Z, 27->AA, 28->AB...)
+def numberToLetters(q):
+    q = q - 1
+    result = ''
+    while q >= 0:
+        remain = q % 26
+        result = chr(remain+65) + result;
+        q = q//26 - 1
+    return result
+
+# Select the range that will be updated ('A1:C3' for example)
+#print 'A1:'+numberToLetters(num_columns)+str(num_lines)
+cell_list = ws.range('A1:'+numberToLetters(num_columns)+str(num_lines))
+
+# Modify the values
+for cell in cell_list:
+    val = df.iloc[cell.row-1,cell.col-1]
+    cell.value = val
+
+# Update in batch
+ws.update_cells(cell_list)  

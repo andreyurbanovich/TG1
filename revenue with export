@@ -107,7 +107,10 @@ for i in range(137):
         av_DAU1 = sum_DAU1/daycounter1
     else:
         av_DAU1 =0
-    av_DAU2 = sum_DAU2/daycounter2
+    if daycounter2 >0:    
+        av_DAU2 = sum_DAU2/daycounter2
+    else:
+        av_DAU2 = 0
     revenue_list_row = [game,platform,total_revenue2,sum_installs2,iap_revenue2,
                         ad_revenue2,round(av_ARPDAU2,2),av_DAU2,total_revenue1,sum_installs1,iap_revenue1,
                         ad_revenue1,round(av_ARPDAU1,2),av_DAU1,total_revenue,sum_installs,iap_revenue,

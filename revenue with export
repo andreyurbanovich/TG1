@@ -99,7 +99,7 @@ for i in range(137):
         av_ARPDAU1 = total_revenue1 /sum_DAU1    
     if sum_DAU2 == 0:
         av_ARPDAU2 =0
-     else:
+    else:
         av_ARPDAU2 = total_revenue2 /sum_DAU2 
     if daycounter >0:
         av_DAU = sum_DAU/daycounter
